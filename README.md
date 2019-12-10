@@ -1,0 +1,2 @@
+# RdrWMPPlugin
+プロデルWindows Media Playerプラグイン
