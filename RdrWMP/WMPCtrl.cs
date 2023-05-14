@@ -9,6 +9,7 @@ using System.IO;
 using WMPLib;
 using System.Drawing;
 using System.Runtime.InteropServices;
+using System.ComponentModel;
 
 [assembly: ResourceAssembly("Produire.WMP.Interop.WMPLib.dll")]
 [assembly: ResourceAssembly("Produire.WMP.AxInterop.WMPLib.dll")]
@@ -29,6 +30,7 @@ namespace Produire.WMP
 		public event EventHandler 現在メディアが変更された;
 		public event EventHandler メディア情報が変更された;
 		public event ProduireEventHandler 再生位置が変更された;
+		public event EventHandler エラーが発生した;
 
 		#endregion
 
@@ -40,7 +42,7 @@ namespace Produire.WMP
 		#region 手順
 
 		[自分("で")]
-		public void 開く([を]string アドレス)
+		public void 開く([を] string アドレス)
 		{
 			if (!initialized) 初期化();
 			string lurl = アドレス.ToLower();
@@ -328,24 +330,35 @@ namespace Produire.WMP
 
 		private void SetEventHandling()
 		{
-			base.PlayStateChange += new AxWMPLib._WMPOCXEvents_PlayStateChangeEventHandler(WindowsMediaPlayer部品_PlayStateChange);
-			base.CurrentItemChange += new AxWMPLib._WMPOCXEvents_CurrentItemChangeEventHandler(WindowsMediaPlayer部品_CurrentItemChange);
-			base.PositionChange += new AxWMPLib._WMPOCXEvents_PositionChangeEventHandler(WindowsMediaPlayer部品_PositionChange);
-			base.MediaChange += new AxWMPLib._WMPOCXEvents_MediaChangeEventHandler(WindowsMediaPlayer部品_MediaChange);
-			base.StatusChange += new EventHandler(WindowsMediaPlayer部品_StatusChange);
+			base.PlayStateChange += WMP_PlayStateChange;
+			base.CurrentItemChange += WMP_CurrentItemChange;
+			base.PositionChange += WMP_PositionChange;
+			base.MediaChange += WMP_MediaChange;
+			base.StatusChange += WMP_StatusChange;
+
+			base.ClickEvent += WMP_ClickEvent;
+			base.DoubleClickEvent += WMP_DoubleClickEvent;
+
+			base.KeyDownEvent += WMP_KeyDownEvent;
+			base.KeyPressEvent += WMP_KeyPressEvent;
+			base.KeyUpEvent += WMP_KeyUpEvent;
+			base.MouseDownEvent += WMP_MouseDownEvent;
+			base.MouseMoveEvent += WMP_MouseMoveEvent;
+			base.MouseUpEvent += WMP_MouseUpEvent;
+			base.ErrorEvent += WMP_ErrorEvent;
 		}
 
-		void WindowsMediaPlayer部品_PlayStateChange(object sender, _WMPOCXEvents_PlayStateChangeEvent e)
+		void WMP_PlayStateChange(object sender, _WMPOCXEvents_PlayStateChangeEvent e)
 		{
 			if (再生状態が変更された != null) 再生状態が変更された(this, EventArgs.Empty);
 		}
 
-		void WindowsMediaPlayer部品_StatusChange(object sender, EventArgs e)
+		void WMP_StatusChange(object sender, EventArgs e)
 		{
 			if (状態が変更された != null) 状態が変更された(this, EventArgs.Empty);
 		}
 
-		void WindowsMediaPlayer部品_MediaChange(object sender, _WMPOCXEvents_MediaChangeEvent e)
+		void WMP_MediaChange(object sender, _WMPOCXEvents_MediaChangeEvent e)
 		{
 			if (メディア情報が変更された != null)
 			{
@@ -354,12 +367,12 @@ namespace Produire.WMP
 			}
 		}
 
-		void WindowsMediaPlayer部品_PositionChange(object sender, _WMPOCXEvents_PositionChangeEvent e)
+		void WMP_PositionChange(object sender, _WMPOCXEvents_PositionChangeEvent e)
 		{
 			if (再生位置が変更された != null) 再生位置が変更された(this, new 再生位置イベント情報(e));
 		}
 
-		void WindowsMediaPlayer部品_CurrentItemChange(object sender, _WMPOCXEvents_CurrentItemChangeEvent e)
+		void WMP_CurrentItemChange(object sender, _WMPOCXEvents_CurrentItemChangeEvent e)
 		{
 			if (現在メディアが変更された != null)
 			{
@@ -368,7 +381,92 @@ namespace Produire.WMP
 			}
 		}
 
+		private void WMP_ErrorEvent(object sender, EventArgs e)
+		{
+			if (エラーが発生した != null) エラーが発生した(this, EventArgs.Empty);
+		}
+
 		#endregion
+
+		#region キーボード
+
+		private void WMP_KeyDownEvent(object sender, _WMPOCXEvents_KeyDownEvent e)
+		{
+			var e2 = new KeyEventArgs((Keys)e.nKeyCode);
+			base.OnKeyDown(e2);
+		}
+
+		protected override void OnKeyDown(KeyEventArgs e)
+		{
+		}
+
+		private void WMP_KeyPressEvent(object sender, _WMPOCXEvents_KeyPressEvent e)
+		{
+			base.OnKeyPress(new KeyPressEventArgs((char)e.nKeyAscii));
+		}
+		protected override void OnKeyPress(KeyPressEventArgs e)
+		{
+		}
+
+		private void WMP_KeyUpEvent(object sender, _WMPOCXEvents_KeyUpEvent e)
+		{
+			var e2 = new KeyEventArgs((Keys)e.nKeyCode);
+			base.OnKeyUp(e2);
+		}
+		protected override void OnKeyUp(KeyEventArgs e)
+		{
+		}
+
+		#endregion
+
+		#region マウス
+
+		private void WMP_MouseDownEvent(object sender, _WMPOCXEvents_MouseDownEvent e)
+		{
+			base.OnMouseDown(new MouseEventArgs(GetButtons(e.nButton), 1, e.fX, e.fY, 0));
+		}
+		protected override void OnMouseDown(MouseEventArgs e)
+		{
+		}
+
+		private void WMP_MouseMoveEvent(object sender, _WMPOCXEvents_MouseMoveEvent e)
+		{
+			base.OnMouseMove(new MouseEventArgs(GetButtons(e.nButton), 1, e.fX, e.fY, 0));
+		}
+		protected override void OnMouseMove(MouseEventArgs e)
+		{
+		}
+
+		private void WMP_MouseUpEvent(object sender, _WMPOCXEvents_MouseUpEvent e)
+		{
+			base.OnMouseUp(new MouseEventArgs(GetButtons(e.nButton), 1, e.fX, e.fY, 0));
+		}
+
+		/// <summary></summary>
+		public MouseButtons GetButtons(short nButton)
+		{
+			if ((nButton & 1) != 0)
+				return MouseButtons.Left;
+			else if ((nButton & 2) != 0)
+				return MouseButtons.Right;
+			else if ((nButton & 4) != 0)
+				return MouseButtons.Middle;
+			else
+				return MouseButtons.None;
+		}
+
+
+		private void WMP_ClickEvent(object sender, _WMPOCXEvents_ClickEvent e)
+		{
+			base.OnClick(EventArgs.Empty);
+		}
+
+		private void WMP_DoubleClickEvent(object sender, _WMPOCXEvents_DoubleClickEvent e)
+		{
+			base.OnDoubleClick(EventArgs.Empty);
+		}
+		#endregion
+
 	}
 
 	[列挙体(typeof(WMPPlayState))]
@@ -405,7 +503,7 @@ namespace Produire.WMP
 		#region 手順
 
 		[自分("から"), 補語("属性を"), 手順("取得")]
-		public string 属性を取得([という]string 属性名)
+		public string 属性を取得([という] string 属性名)
 		{
 			return media.getItemInfo(属性名);
 		}
