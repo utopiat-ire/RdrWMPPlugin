@@ -11,7 +11,7 @@ using Produire;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("utopiat.net")]
 [assembly: AssemblyProduct("Windows Media Playerプラグイン")]
-[assembly: AssemblyCopyright("Copyright(C) 2011-2022 utopiat.net")]
+[assembly: AssemblyCopyright("Copyright(C) 2011-2023 utopiat.net")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -39,4 +39,7 @@ using Produire;
 // 既定値にすることができます:
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.1.0.0")]
+[assembly: AssemblyFileVersion("1.2.0.0")]
+
+[assembly: ResourceAssembly("Produire.WMP.Interop.WMPLib.dll")]
+[assembly: ResourceAssembly("Produire.WMP.AxInterop.WMPLib.dll")]

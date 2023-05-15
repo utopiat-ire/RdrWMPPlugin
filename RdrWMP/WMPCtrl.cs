@@ -9,10 +9,6 @@ using System.IO;
 using WMPLib;
 using System.Drawing;
 using System.Runtime.InteropServices;
-using System.ComponentModel;
-
-[assembly: ResourceAssembly("Produire.WMP.Interop.WMPLib.dll")]
-[assembly: ResourceAssembly("Produire.WMP.AxInterop.WMPLib.dll")]
 
 namespace Produire.WMP
 {
@@ -109,7 +105,7 @@ namespace Produire.WMP
 				throw new ProduireException("停止が利用できない状態です。HRESULT:" + ex.ErrorCode.ToString("X"));
 			}
 		}
-		[自分("を")]
+		[自分("を"), 補語("次へ"), 動詞("進む")]
 		public void 次へ進む()
 		{
 			if (!initialized) 初期化();
@@ -122,7 +118,7 @@ namespace Produire.WMP
 				throw new ProduireException("この操作が利用できない状態です。HRESULT:" + ex.ErrorCode.ToString("X"));
 			}
 		}
-		[自分("を")]
+		[自分("を"), 補語("前へ"), 動詞("戻る")]
 		public void 前へ戻る()
 		{
 			if (!initialized) 初期化();
@@ -440,6 +436,9 @@ namespace Produire.WMP
 		private void WMP_MouseUpEvent(object sender, _WMPOCXEvents_MouseUpEvent e)
 		{
 			base.OnMouseUp(new MouseEventArgs(GetButtons(e.nButton), 1, e.fX, e.fY, 0));
+		}
+		protected override void OnMouseUp(MouseEventArgs e)
+		{
 		}
 
 		/// <summary></summary>
